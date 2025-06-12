@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Screening</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f7fb;
+            padding: 30px;
+            text-align: center;
+        }
+        form, table {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin: auto;
+            max-width: 700px;
+        }
+        textarea, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            margin-top: 40px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        #results-section {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Resume Screening</h2>
+    <form id="resumeForm" enctype="multipart/form-data">
+        <label>Job Description:</label><br>
+        <textarea name="job_description" rows="6" required></textarea><br><br>
+
+        <label>Select Resumes (.txt/.pdf):</label><br>
+        <input type="file" name="resumes" multiple required><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="results-section">
+        <h2>Results</h2>
+        <table id="results-table">
+            <tr>
+                <th>Rank</th>
+                <th>Filename</th>
+                <th>Predicted Category</th>
+                <th>Confidence</th>
+                <th>Similarity</th>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        const form = document.getElementById('resumeForm');
+        const resultsSection = document.getElementById('results-section');
+        const resultsTable = document.getElementById('results-table');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to process resumes.');
+                return response.json();
+            })
+            .then(data => {
+                // Clear previous rows
+                resultsTable.innerHTML = `
+                    <tr>
+                        <th>Rank</th>
+                        <th>Filename</th>
+                        <th>Predicted Category</th>
+                        <th>Confidence</th>
+                        <th>Similarity</th>
+                    </tr>
+                `;
+
+                data.results.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row[0]}</td>
+                        <td>${row[1]}</td>
+                        <td>${row[2]}</td>
+                        <td>${row[3].toFixed(2)}</td>
+                        <td>${row[4].toFixed(2)}</td>
+                    `;
+                    resultsTable.appendChild(tr);
+                });
+
+                resultsSection.style.display = 'block';
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
