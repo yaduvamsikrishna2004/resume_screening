@@ -1,24 +1,48 @@
 import os
 import pickle
 import tempfile
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from datetime import datetime
 import fitz  # PyMuPDF
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
+from flask_mail import Mail, Message
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Flask setup
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Set a strong secret key
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
+
+# Mail configuration (update with your mail server settings)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'your_gmail@gmail.com'
+app.config['MAIL_PASSWORD'] = 'your_app_password'
+mail = Mail(app)
+
+# Admin credentials (update or use env variables in production)
+ADMIN_EMAIL = 'admin@example.com'
+ADMIN_PASSWORD = generate_password_hash('adminpassword')
 
 # MongoDB setup
 client = MongoClient("mongodb://localhost:27017/")
 db = client["resume_screening"]
 uploads_col = db["uploads"]
+users_collection = db["users"]
+contact_collection = db["contacts"]
+
+# Dummy email notification function (you can customize)
+def send_login_email(email, password):
+    # msg = Message('Login Notification', recipients=[email])
+    # msg.body = f'You have successfully logged in.\n\nEmail: {email}'
+    # mail.send(msg)
+    pass
 
 # Load ML model
 with open("model.pkl", "rb") as f:
@@ -54,6 +78,13 @@ def rank_resumes(job_desc, resumes):
 def index():
     return render_template('index.html')
 
+@app.route('/resume')
+def resume():
+    if 'user' not in session:
+        return redirect(url_for('signin'))
+    return render_template('resume.html')
+
+
 # Prediction route
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -74,7 +105,6 @@ def predict():
                 resume_texts.append(text)
                 resume_names.append(filename)
 
-                # Log to MongoDB
                 uploads_col.insert_one({
                     "filename": filename,
                     "text": text,
@@ -84,7 +114,6 @@ def predict():
     if not resume_texts:
         return jsonify({"error": "No valid resumes uploaded."}), 400
 
-    # Predict
     predictions = model.predict(resume_texts)
     if hasattr(model, "predict_proba"):
         proba = model.predict_proba(resume_texts)
@@ -92,10 +121,8 @@ def predict():
     else:
         confidences = [1.0] * len(predictions)
 
-    # Similarity to job description
     similarities = rank_resumes(job_desc, resume_texts)
 
-    # Combine and sort
     results = list(zip(resume_names, predictions, confidences, similarities))
     results.sort(key=lambda x: x[2], reverse=True)
 
@@ -109,7 +136,69 @@ def predict():
 
     return jsonify({"results": results_with_rank})
 
+# Contact route
+@app.route('/contactus', methods=['GET', 'POST'])
+def contactus():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message = request.form.get('message')
+        contact_message = {'name': name, 'email': email, 'message': message}
+        contact_collection.insert_one(contact_message)
+        msg = Message('Contact Form Submission', recipients=[email])
+        msg.body = 'Thank you for reaching out! We will get back to you soon.'
+        mail.send(msg)
+        return jsonify({'status': 'success', 'message': 'Message sent successfully!'})
+    return render_template('contactus.html')
+
+# Signin route
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        if email == ADMIN_EMAIL and check_password_hash(ADMIN_PASSWORD, password):
+            session['user'] = email
+            return redirect(url_for('resume'))
+
+        user = users_collection.find_one({"email": email})
+        if user and check_password_hash(user['password'], password):
+            session['user'] = user['email']
+            if not user.get('logged_in', False):
+                send_login_email(user['email'], password)
+                users_collection.update_one({"email": email}, {"$set": {"logged_in": True}})
+            if user.get('form_submitted', False):
+                return redirect(url_for('resume'))
+            else:
+                return redirect(url_for('resume'))
+        return "Invalid credentials. Try again."
+    return render_template('signin.html')
+
+# Signup route
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        mobile = request.form['mobile']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password)
+        users_collection.insert_one({
+            "name": name,
+            "email": email,
+            "mobile": mobile,
+            "password": hashed_password,
+            "logged_in": False,
+            "form_submitted": False
+        })
+        return redirect(url_for('signin'))
+    return render_template('signup.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
 # Run app
 if __name__ == '__main__':
     app.run(debug=True)
-

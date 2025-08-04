@@ -1,472 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Resume Screening</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1e90ff, #00bfff);
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .navbar {
-      width: 100%;
-      background: white;
-      color: #0056b3;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .navbar-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 5%;
-      height: 60px;
-    }
-
-    .navbar-brand {
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    .navbar-links {
-      list-style: none;
-      display: flex;
-      gap: 28px;
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar-links li {
-      display: inline;
-    }
-
-    .navbar-links a {
-      color: #0056b3;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .navbar-links a:hover {
-      color: #ff0000;
-    }
-
-    .main-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 5%;
-      flex: 1;
-      flex-wrap: wrap;
-    }
-
-    .left, .right {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .left {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 100%;
-      padding-right: 40px;
-    }
-
-    .left h1 {
-      font-size: 38px;
-      margin-bottom: 15px;
-    }
-
-    .left p {
-      font-size: 18px;
-    }
-
-    .right {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-    }
-
-    .right img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .spacer {
-      height: 200px;
-    }
-
-    .form-below {
-      background-color: #ffffff;
-      color: #333;
-      padding: 30px;
-      margin: 30px auto;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-      max-width: 700px;
-      width: 98%;
-      text-align: center;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-top: 10px;
-      color: #2c3e50;
-    }
-
-    .form-below textarea,
-    .form-below input[type="file"] {
-      width: 100%;
-      min-width: 350px;
-      max-width: 700px;
-      padding: 16px;
-      margin-top: 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 17px;
-      box-sizing: border-box;
-    }
-
-    .form-below textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-
-    button {
-      margin-top: 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 14px 22px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #results-section {
-      display: none;
-      margin: 40px auto;
-      max-width: 1100px;
-      background-color: white;
-      color: #333;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    }
-
-    #results-section h2 {
-      color: #007bff;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 15px;
-    }
-
-    th, td {
-      padding: 14px;
-      text-align: center;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .scan-btn {
-      margin-top: 28px;
-      background-color: white;
-      color: #007bff;
-      border: none;
-      padding: 14px 32px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 600;
-      transition: background-color 0.3s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .scan-btn:hover {
-      background-color: lightblue;
-    }
-
-    /* Step Progress Bar Styles */
-    .progress-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 40px auto 10px auto;
-      max-width: 700px;
-      width: 100%;
-      gap: 0;
-    }
-
-    .progress-step {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-      min-width: 100px;
-    }
-
-    .circle {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #fff;
-      border: 3px solid #e0e0e0;
-      color: #222;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.7rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: border 0.3s, background 0.3s;
-    }
-
-    .progress-step.active .circle {
-      background: #1e90ff;
-      color: #fff;
-      border: 3px solid #1e90ff;
-      box-shadow: 0 0 10px #1e90ff44;
-    }
-
-    .step-label {
-      font-size: 1.08rem;
-      font-weight: 600;
-      color: #222;
-      margin-top: 2px;
-      text-align: center;
-    }
-
-    .progress-line {
-      height: 3px;
-      background: #e0e0e0;
-      flex: 1;
-      margin: 0 8px;
-      border-radius: 2px;
-    }
-
-    @media (max-width: 900px) {
-      .main-section {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .left {
-        padding-right: 0;
-        align-items: center;
-      }
-
-      .right {
-        padding: 20px;
-      }
-
-      .navbar-container {
-        flex-direction: column;
-        height: auto;
-        padding: 10px 2%;
-      }
-
-      .navbar-links {
-        gap: 14px;
-        font-size: 0.95rem;
-      }
-
-      .progress-container {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .progress-step {
-        margin-bottom: 10px;
-      }
-
-      .progress-line {
-        left: 50%;
-        top: 10px;
-        width: 50%;
-        height: 2px;
-        transform: translateX(-50%);
-      }
-    }
-  </style>
+    <title>AI based resume Screening</title>
 </head>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Header Styling */
+.header {
+    background-color: #0a1931;
+    color: white;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1000;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.logo h1 {
+    font-size: 36px;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    color: #007fb5;
+}
+
+.nav ul {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+}
+
+.nav ul li a {
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+}
+
+.nav ul li a:hover {
+    background-color: #00adb5;
+    color: #0a1931;
+}
+
+/* Hero Section */
+.hero {
+    background: url('small-background.jpg') no-repeat center center/cover;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    position: relative;
+    z-index: 900;
+    animation: fadeIn 1.5s ease-out;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.hero-content h2 {
+    font-size: 40px;
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+    color: #00adb5;
+    letter-spacing: 1.5px;
+    animation: slideUp 1.5s ease-out;
+}
+
+@keyframes slideUp {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.hero-content p {
+    font-size: 18px;
+    margin-bottom: 10px;
+    max-width: 600px;
+    line-height: 1.8;
+    animation: fadeIn 1.8s ease-out;
+}
+
+/* Section Styling */
+.information, .features, .success {
+    background-color: #ffffff;
+    padding: 60px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #043687;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 4px solid #00adb5;
+    display: inline-block;
+    padding-bottom: 10px;
+    animation: fadeIn 1.2s ease-out;
+}
+
+.information p, .features p, .success p {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+    line-height: 1.8;
+    animation: fadeIn 1.2s ease-out;
+}
+
+.features .feature-box {
+    background-color: #f9f9f9;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 2px solid #00adb5;
+    border-radius: 10px;
+    text-align: left;
+    max-width: 700px;
+    margin: 30px auto;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.features .feature-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.features .feature-box h3 {
+    color: #0a1931;
+    margin-bottom: 15px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.success p {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 18px;
+    color: #333;
+}
+
+/* Footer Styling */
+footer {
+    background-color: #0a1931;
+    color: #e0e0e0;
+    text-align: center;
+    padding: 40px 0;
+    position: relative;
+    z-index: 1000;
+    box-shadow: 0px -4px 6px rgba(0, 0, 0, 0.2);
+}
+
+footer p {
+    font-size: 18px;
+    margin-bottom: 10px;
+    letter-spacing: 1.5px;
+    font-family: 'Roboto', sans-serif;
+}
+
+
+
+@keyframes footerSlideUp {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Animations */
+@keyframes backgroundScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 100% 0; }
+}
+
+body {
+    background: linear-gradient(135deg, #0a1931, #00adb5);
+    background-size: 400% 400%;
+    animation: backgroundScroll 15s ease infinite;
+}
+
+</style>
 <body>
+    <header class="header">
+        <div class="logo" action="/index">
+            <h1>AI RESUME SCREENING </h1>
+        </div>
+        <nav class="nav">
+            <ul>
+                <li><a href="{{ url_for('resume') }}">Scan Resume</a></li>
+                <li><a href="{{ url_for('signin') }}" class="login-btn">Sign In/Sign Up</a></li>
+                 <li><a href="{{ url_for('contactus') }}">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="navbar-container">
-      <span class="navbar-brand">Resume Screening AI</span>
-      <ul class="navbar-links">
-        <li><a href="#">Home</a></li>
-        <li><a href="#results-section">Results</a></li>
-        <li><a href="#">View Resume</a></li>
-      </ul>
-    </div>
-  </nav>
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Welcome to AI Based Resume Screening</h2>
+            <p>                   AI Resume Screening helps you optimize your resume for any job, highlighting the key experience and skills recruiters need to see. helps you optimize your resume for any job, highlighting the key experience and skills recruiters need to see.</p>
+        </div>
+    </section>
 
-  <!-- Text and Image section -->
-  <div class="main-section">
-    <div class="left">
-      <h1>Optimize your resume to get more interviews</h1>
-      <p>Upload job description and resume files to receive similarity, prediction, and ranking data.</p>
-      <button id="scan-btn" class="scan-btn">Scan Your Resume</button>
-    </div>
+    <section class="information">
+        <div class="container">
+            <h2 class="section-title">Optimize your resume to get more interviews</h2>
+            <p>AI Resume Screening is an AI-powered resume optimization tool that helps you tailor your resume to match job listings. </p>
+            <p>By analyzing your resume and comparing it to the job description, our AI technology provides you with a match rate report </p>
+            <p>With AI Resume Screening, you can ensure that your resume is optimized for Applicant.</p>
+        </div>
+    </section>
 
-    <div class="right">
-      <img src="{{ url_for('static', filename='Cover.png') }}" alt="Resume Screening Illustration">
-    </div>
-  </div>
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why use AI RESUME SCREENING</h2>
+            <div class="feature-box">
+                <h3>RESUME OPTIMIZATION</h3>
+                <p>Is your resume a good match for what a recruiter is looking for? If it's not, you might miss out on interviews for jobs you feel qualified for. AI Resume Screening's proprietary AI analyzes your resume and compares it to the job listing using AI technology. Use your match rate report to see how to optimize your resume to get more interviews.</p>
+            </div>
+            <div class="feature-box">
+                <h3>APPLICANT TRACKING SYSTEM</h3>
+                <p>Most companies, including 99% of Fortune 500, use Applicant Tracking Systems (ATS) to process your resume. These systems might cause qualified candidates like you to slip through the cracks. AI Resume Screeing reverse-engineered all the top ATS and studied recruiter workflows to get you in the "yes" pile.</p>
+            </div>
+            <div class="feature-box">
+                <h3>See your missing skills</h3>
+                <p>AI RESUME SCREENING matches hard skills, soft skills, and keywords from the job listing to your resume. AI-powered system will show you how to tailor your resume so that you highlight the skills and experience recruiters are searching for.</p>
+            </div>
+            <div class="feature-box">
+                <h3>Check ATS Score </h3>
+                <p>Most online resume builders are not designed to help you get past an ATS. AI Resume Screening helps you to check ur ATS Score.  </p>
+            </div>
+        </div>
+    </section>
 
-  <!-- Scroll Spacer -->
-  <div class="spacer"></div>
+    <section class="success">
+        <div class="container">
+            <h2 class="section-title">AI Resume Screening helps to increase your interview chances by 50%</h2>
+            <p>Many job seekers don’t get enough interviews even after applying for dozens of jobs. Why?
+Companies use Applicant Tracking Systems (ATS) to search and filter resumes by keywords.
+The AI Based resume scanner helps you optimize your resume keywords for each job listing so that your application gets found by recruiters.
+            AI Resume Screening is the only resume scanner that helps you optimize your resume for ATS and recruiters. Our AI-powered system analyzes your resume and compares it to the job listing, giving you a match rate report and suggestions on how to improve your resume.
+            With AI Resume Screening, you can increase your chances of getting interviews and landing your dream job.</p>
+        </div>
+    </section>
 
-  <!-- Step Progress Bar -->
-  <div class="progress-container">
-    <div class="progress-step active" id="step1">
-      <div class="circle">1</div>
-      <div class="step-label">Upload Resume</div>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step" id="step2">
-      <div class="circle">2</div>
-      <div class="step-label">Add Job</div>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step" id="step3">
-      <div class="circle">3</div>
-      <div class="step-label">View Results</div>
-    </div>
-  </div>
+    <footer>
+        <p>&copy; 2025 AI Resume Screening. All Rights Reserved.</p>
 
-  <!-- File Upload Form -->
-  <div class="form-below">
-    <form id="resumeForm" enctype="multipart/form-data">
-      <label for="job_description">Job Description:</label>
-      <textarea name="job_description" id="job_description" rows="6" required></textarea>
-
-      <label for="resumes">Select Resumes (.txt/.pdf):</label>
-      <input type="file" name="resumes" id="resumes" multiple required accept=".txt,.pdf">
-
-      <button type="submit">Submit</button>
-    </form>
-  </div>
-
-  <!-- Results Section -->
-  <div id="results-section">
-    <h2>Results</h2>
-    <table id="results-table">
-      <tr>
-        <th>Rank</th>
-        <th>Filename</th>
-        <th>Predicted Category</th>
-        <th>Confidence</th>
-        <th>Similarity</th>
-      </tr>
-    </table>
-  </div>
-
-  <script>
-    const form = document.getElementById('resumeForm');
-    const resultsSection = document.getElementById('results-section');
-    const resultsTable = document.getElementById('results-table');
-
-    // Helper to set active step
-    function setActiveStep(step) {
-      for (let i = 1; i <= 3; i++) {
-        document.getElementById('step' + i).classList.remove('active');
-      }
-      document.getElementById('step' + step).classList.add('active');
-    }
-
-    // Move to step 2 when job description is filled
-    document.getElementById('job_description').addEventListener('input', function() {
-      if (this.value.trim().length > 0) {
-        setActiveStep(2);
-      } else {
-        setActiveStep(1);
-      }
-    });
-
-    // Move to step 3 after results are shown
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const formData = new FormData(form);
-
-      fetch('/predict', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Failed to process resumes.');
-        return response.json();
-      })
-      .then(data => {
-        resultsTable.innerHTML = `
-          <tr>
-            <th>Rank</th>
-            <th>Filename</th>
-            <th>Predicted Category</th>
-            <th>Confidence</th>
-            <th>Similarity</th>
-          </tr>
-        `;
-
-        data.results.forEach(row => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${row[0]}</td>
-            <td>${row[1]}</td>
-            <td>${row[2]}</td>
-            <td>${row[3].toFixed(2)}</td>
-            <td>${row[4].toFixed(2)}</td>
-          `;
-          resultsTable.appendChild(tr);
-        });
-
-        resultsSection.style.display = 'block';
-        resultsSection.scrollIntoView({ behavior: 'smooth' });
-        setActiveStep(3); // Move to step 3
-      })
-      .catch(error => {
-        alert('Error: ' + error.message);
-      });
-    });
-
-    document.getElementById('scan-btn').onclick = function() {
-      document.querySelector('.form-below').scrollIntoView({ behavior: 'smooth' });
-    };
-  </script>
-
+    </footer>
 </body>
 </html>
