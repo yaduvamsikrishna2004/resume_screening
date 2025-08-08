@@ -1,7 +1,7 @@
+# webapp/app.py
 import os
 import pickle
-import tempfile
-from flask import Flask, request, render_template, jsonify, redirect, url_for, session
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session, send_from_directory
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from datetime import datetime
@@ -10,25 +10,32 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
+import uuid
+
+# --- 1. SETUP ---
 
 # Flask setup
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a strong secret key
+app.secret_key = 'your_secret_key'  # IMPORTANT: Change this in production
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
 
-# Mail configuration (update with your mail server settings)
+# Create upload folder if it doesn't exist
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Mail configuration (update with your real mail server settings)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your_gmail@gmail.com'
-app.config['MAIL_PASSWORD'] = 'your_app_password'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'your_gmail@gmail.com') # Use environment variables
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'your_app_password') # Use environment variables
 mail = Mail(app)
 
-# Admin credentials (update or use env variables in production)
-ADMIN_EMAIL = 'admin@example.com'
-ADMIN_PASSWORD = generate_password_hash('adminpassword')
+# Admin credentials (use environment variables in production)
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+ADMIN_PASSWORD = generate_password_hash(os.environ.get('ADMIN_PASSWORD', 'adminpassword'))
 
 # MongoDB setup
 client = MongoClient("mongodb://localhost:27017/")
@@ -37,43 +44,45 @@ uploads_col = db["uploads"]
 users_collection = db["users"]
 contact_collection = db["contacts"]
 
-# Dummy email notification function (you can customize)
-def send_login_email(email, password):
-    # msg = Message('Login Notification', recipients=[email])
-    # msg.body = f'You have successfully logged in.\n\nEmail: {email}'
-    # mail.send(msg)
-    pass
+# Load ML model with error handling
+try:
+    with open("model.pkl", "rb") as f:
+        model = pickle.load(f)
+except FileNotFoundError:
+    print("\n--- WARNING: model.pkl not found. Prediction endpoint will not work. ---\n")
+    model = None
 
-# Load ML model
-with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
+# --- 2. HELPER FUNCTIONS ---
 
-# File validation
 def allowed_file(filename):
+    """Checks if a filename has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Text extraction
 def extract_text(file_path):
+    """Extracts text from a .txt or .pdf file."""
     ext = os.path.splitext(file_path)[1].lower()
-    if ext == '.txt':
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    elif ext == '.pdf':
-        doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            text += page.get_text()
-        return text
-    return ""
+    text = ""
+    try:
+        if ext == '.txt':
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+        elif ext == '.pdf':
+            doc = fitz.open(file_path)
+            for page in doc:
+                text += page.get_text()
+    except Exception as e:
+        print(f"Error extracting text from {file_path}: {e}")
+    return text
 
-# Similarity ranking
 def rank_resumes(job_desc, resumes):
+    """Calculates cosine similarity between a job description and a list of resumes."""
     vectorizer = TfidfVectorizer(stop_words='english')
     vectors = vectorizer.fit_transform([job_desc] + resumes)
     similarities = cosine_similarity(vectors[0:1], vectors[1:]).flatten()
     return similarities
 
-# Home route
+# --- 3. CORE FLASK ROUTES ---
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -82,81 +91,110 @@ def index():
 def resume():
     if 'user' not in session:
         return redirect(url_for('signin'))
-    return render_template('resume.html')
+    # Pass a flag to the template to indicate if the model is loaded
+    model_loaded = model is not None
+    return render_template('resume.html', model_loaded=model_loaded)
 
-
-# Prediction route
 @app.route('/predict', methods=['POST'])
 def predict():
-    job_desc = request.form["job_description"]
+    """Processes uploaded resumes, predicts categories, ranks them, and returns results."""
+    if model is None:
+        return jsonify({"error": "The prediction model is not loaded on the server. Please contact the administrator."}), 500
+
+    job_desc = request.form.get("job_description", "")
     files = request.files.getlist("resumes")
 
-    resume_texts = []
-    resume_names = []
+    resume_data = []
 
     for file in files:
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            temp_path = os.path.join(tempfile.gettempdir(), filename)
-            file.save(temp_path)
+            original_filename = secure_filename(file.filename)
+            unique_filename = f"{uuid.uuid4().hex[:8]}_{original_filename}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            file.save(file_path)
 
-            text = extract_text(temp_path)
+            text = extract_text(file_path)
             if text.strip():
-                resume_texts.append(text)
-                resume_names.append(filename)
-
+                resume_data.append({
+                    "text": text,
+                    "original_name": original_filename,
+                    "unique_name": unique_filename
+                })
                 uploads_col.insert_one({
-                    "filename": filename,
+                    "original_filename": original_filename,
+                    "stored_filename": unique_filename,
                     "text": text,
                     "uploaded_at": datetime.utcnow()
                 })
 
-    if not resume_texts:
-        return jsonify({"error": "No valid resumes uploaded."}), 400
+    if not resume_data:
+        return jsonify({"error": "No valid resumes were uploaded or text could not be extracted."}), 400
 
+    resume_texts = [r['text'] for r in resume_data]
+    
     predictions = model.predict(resume_texts)
-    if hasattr(model, "predict_proba"):
-        proba = model.predict_proba(resume_texts)
-        confidences = proba.max(axis=1)
-    else:
-        confidences = [1.0] * len(predictions)
-
+    confidences = model.predict_proba(resume_texts).max(axis=1) if hasattr(model, "predict_proba") else [1.0] * len(predictions)
     similarities = rank_resumes(job_desc, resume_texts)
 
-    results = list(zip(resume_names, predictions, confidences, similarities))
-    results.sort(key=lambda x: x[2], reverse=True)
+    results = []
+    for i, data in enumerate(resume_data):
+        combined_score = (confidences[i] + similarities[i]) / 2
+        download_url = url_for('download_resume', filename=data['unique_name'])
+        
+        results.append({
+            "name": data['original_name'],
+            "prediction": predictions[i],
+            "confidence": float(confidences[i]),
+            "similarity": float(similarities[i]),
+            "score": float(combined_score),
+            "download_url": download_url
+        })
 
-    combined_scores = [(conf + sim) / 2 for _, _, conf, sim in results]
-    results = [res + (score,) for res, score in zip(results, combined_scores)]
-    results.sort(key=lambda x: x[4], reverse=True)
-    results_with_rank = [
-        [i + 1, name, pred, float(conf), float(sim), float(score)]
-        for i, (name, pred, conf, sim, score) in enumerate(results)
-    ]
+    results.sort(key=lambda x: x['score'], reverse=True)
+    ranked_results = [{**res, "rank": i + 1} for i, res in enumerate(results)]
 
-    return jsonify({"results": results_with_rank})
+    return jsonify({"results": ranked_results})
 
-# Contact route
+#
+# --- THIS FUNCTION WAS MISSING ---
+#
+@app.route('/download/<filename>')
+def download_resume(filename):
+    """Serves a file for download from the UPLOAD_FOLDER."""
+    return send_from_directory(
+        directory=app.config['UPLOAD_FOLDER'],
+        path=filename,
+        as_attachment=True
+    )
+#
+# --- END OF MISSING FUNCTION ---
+#
+
+# --- 4. USER AND CONTACT ROUTES ---
+
 @app.route('/contactus', methods=['GET', 'POST'])
 def contactus():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
         message = request.form.get('message')
-        contact_message = {'name': name, 'email': email, 'message': message}
+        contact_message = {'name': name, 'email': email, 'message': message, 'sent_at': datetime.utcnow()}
         contact_collection.insert_one(contact_message)
-        msg = Message('Contact Form Submission', recipients=[email])
-        msg.body = 'Thank you for reaching out! We will get back to you soon.'
-        mail.send(msg)
+        try:
+            msg = Message('Contact Form Submission', recipients=[email])
+            msg.body = 'Thank you for reaching out! We will get back to you soon.'
+            mail.send(msg)
+        except Exception as e:
+            print(f"Mail sending failed: {e}") # Log error but don't stop the user
         return jsonify({'status': 'success', 'message': 'Message sent successfully!'})
     return render_template('contactus.html')
 
-# Signin route
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        
         if email == ADMIN_EMAIL and check_password_hash(ADMIN_PASSWORD, password):
             session['user'] = email
             return redirect(url_for('resume'))
@@ -164,17 +202,11 @@ def signin():
         user = users_collection.find_one({"email": email})
         if user and check_password_hash(user['password'], password):
             session['user'] = user['email']
-            if not user.get('logged_in', False):
-                send_login_email(user['email'], password)
-                users_collection.update_one({"email": email}, {"$set": {"logged_in": True}})
-            if user.get('form_submitted', False):
-                return redirect(url_for('resume'))
-            else:
-                return redirect(url_for('resume'))
-        return "Invalid credentials. Try again."
+            return redirect(url_for('resume'))
+            
+        return "Invalid credentials. Please try again."
     return render_template('signin.html')
 
-# Signup route
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -182,14 +214,15 @@ def signup():
         email = request.form['email']
         mobile = request.form['mobile']
         password = request.form['password']
-        hashed_password = generate_password_hash(password)
+        
+        if users_collection.find_one({"email": email}):
+            return "An account with this email already exists.", 400
+
         users_collection.insert_one({
             "name": name,
             "email": email,
             "mobile": mobile,
-            "password": hashed_password,
-            "logged_in": False,
-            "form_submitted": False
+            "password": generate_password_hash(password)
         })
         return redirect(url_for('signin'))
     return render_template('signup.html')
@@ -199,6 +232,7 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# Run app
+# --- 5. RUN APP ---
+
 if __name__ == '__main__':
     app.run(debug=True)
