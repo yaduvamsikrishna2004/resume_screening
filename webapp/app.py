@@ -1,7 +1,6 @@
-# webapp/app.py
 import os
 import pickle
-from flask import Flask, request, render_template, jsonify, redirect, url_for, session, send_from_directory
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session, send_from_directory, abort
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from datetime import datetime
@@ -11,26 +10,34 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+import flask
 
 # --- 1. SETUP ---
 
-# Flask setup
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # IMPORTANT: Change this in production
-UPLOAD_FOLDER = 'uploads'
+# NOTE: use a strong secret from env in prod
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev_only_change_me')
+
+# Always use an absolute path for uploads (single source of truth)
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
+# Optional: protect against huge uploads (e.g., 16 MB)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Create upload folder if it doesn't exist
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Create the uploads folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Detect Flask version to choose correct send_from_directory parameter
+FLASK_VERSION = tuple(map(int, flask.__version__.split('.')[:2]))
+USE_PATH_PARAM = FLASK_VERSION >= (3, 0)
 
 # Mail configuration (update with your real mail server settings)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'your_gmail@gmail.com') # Use environment variables
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'your_app_password') # Use environment variables
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'your_gmail@gmail.com')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', 'your_app_password')
 mail = Mail(app)
 
 # Admin credentials (use environment variables in production)
@@ -64,12 +71,13 @@ def extract_text(file_path):
     text = ""
     try:
         if ext == '.txt':
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 text = f.read()
         elif ext == '.pdf':
-            doc = fitz.open(file_path)
-            for page in doc:
-                text += page.get_text()
+            # Ensure the document is closed (avoids file-lock issues on Windows)
+            with fitz.open(file_path) as doc:
+                for page in doc:
+                    text += page.get_text()
     except Exception as e:
         print(f"Error extracting text from {file_path}: {e}")
     return text
@@ -91,7 +99,6 @@ def index():
 def resume():
     if 'user' not in session:
         return redirect(url_for('signin'))
-    # Pass a flag to the template to indicate if the model is loaded
     model_loaded = model is not None
     return render_template('resume.html', model_loaded=model_loaded)
 
@@ -108,6 +115,7 @@ def predict():
 
     for file in files:
         if file and allowed_file(file.filename):
+            # Secure once, then prepend a short UUID
             original_filename = secure_filename(file.filename)
             unique_filename = f"{uuid.uuid4().hex[:8]}_{original_filename}"
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
@@ -131,7 +139,6 @@ def predict():
         return jsonify({"error": "No valid resumes were uploaded or text could not be extracted."}), 400
 
     resume_texts = [r['text'] for r in resume_data]
-    
     predictions = model.predict(resume_texts)
     confidences = model.predict_proba(resume_texts).max(axis=1) if hasattr(model, "predict_proba") else [1.0] * len(predictions)
     similarities = rank_resumes(job_desc, resume_texts)
@@ -140,7 +147,6 @@ def predict():
     for i, data in enumerate(resume_data):
         combined_score = (confidences[i] + similarities[i]) / 2
         download_url = url_for('download_resume', filename=data['unique_name'])
-        
         results.append({
             "name": data['original_name'],
             "prediction": predictions[i],
@@ -152,23 +158,32 @@ def predict():
 
     results.sort(key=lambda x: x['score'], reverse=True)
     ranked_results = [{**res, "rank": i + 1} for i, res in enumerate(results)]
-
     return jsonify({"results": ranked_results})
 
-#
-# --- THIS FUNCTION WAS MISSING ---
-#
+# --- Download route (Flask 2.x & 3.x compatible) ---
 @app.route('/download/<filename>')
 def download_resume(filename):
     """Serves a file for download from the UPLOAD_FOLDER."""
-    return send_from_directory(
-        directory=app.config['UPLOAD_FOLDER'],
-        path=filename,
-        as_attachment=True
-    )
-#
-# --- END OF MISSING FUNCTION ---
-#
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # Check if the file exists before sending
+    if not os.path.isfile(file_path):
+        abort(404, description=f"Resume '{filename}' not found.")
+
+    if USE_PATH_PARAM:
+        # Flask 3.x+ uses 'path'
+        return send_from_directory(
+            directory=app.config['UPLOAD_FOLDER'],
+            path=filename,
+            as_attachment=True
+        )
+    else:
+        # Flask 2.x uses 'filename'
+        return send_from_directory(
+            directory=app.config['UPLOAD_FOLDER'],
+            filename=filename,
+            as_attachment=True
+        )
 
 # --- 4. USER AND CONTACT ROUTES ---
 
@@ -185,7 +200,7 @@ def contactus():
             msg.body = 'Thank you for reaching out! We will get back to you soon.'
             mail.send(msg)
         except Exception as e:
-            print(f"Mail sending failed: {e}") # Log error but don't stop the user
+            print(f"Mail sending failed: {e}")  # Log error but don't block
         return jsonify({'status': 'success', 'message': 'Message sent successfully!'})
     return render_template('contactus.html')
 
@@ -194,7 +209,7 @@ def signin():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        
+
         if email == ADMIN_EMAIL and check_password_hash(ADMIN_PASSWORD, password):
             session['user'] = email
             return redirect(url_for('resume'))
@@ -203,7 +218,7 @@ def signin():
         if user and check_password_hash(user['password'], password):
             session['user'] = user['email']
             return redirect(url_for('resume'))
-            
+
         return "Invalid credentials. Please try again."
     return render_template('signin.html')
 
@@ -214,7 +229,7 @@ def signup():
         email = request.form['email']
         mobile = request.form['mobile']
         password = request.form['password']
-        
+
         if users_collection.find_one({"email": email}):
             return "An account with this email already exists.", 400
 
