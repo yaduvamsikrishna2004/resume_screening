@@ -1,84 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Resume Screening contact</title>
- 
+    <meta charset="UTF-8">
+    <title>Contact Us - AI Resume Screening</title>
+    <!-- Font and CSS Styles (same as before) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; color: #333; overflow-x: hidden; background: linear-gradient(135deg, #0a1931, #00adb5); background-size: 400% 400%; animation: backgroundScroll 15s ease infinite; display: flex; flex-direction: column; min-height: 100vh; }
+        .main-content { flex: 1; }
+        .header { background-color: #0a1931; color: white; padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); }
+        .logo h1 { font-size: 36px; font-weight: bold; font-family: 'Poppins', sans-serif; color: #007fb5; }
+        .nav ul { list-style: none; display: flex; gap: 30px; }
+        .nav ul li a { color: #e0e0e0; text-decoration: none; font-size: 18px; padding: 10px 15px; transition: all 0.3s ease-in-out; border-radius: 8px; }
+        .nav ul li a:hover { background-color: #00adb5; color: #0a1931; }
+        .content-section { background-color: #ffffff; padding: 60px 40px; text-align: center; margin: 40px auto; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); max-width: 900px; width: 95%; }
+        .section-title { font-size: 32px; margin-bottom: 20px; color: #043687; text-transform: uppercase; font-weight: bold; border-bottom: 4px solid #00adb5; display: inline-block; padding-bottom: 10px; }
+        .content-section p { font-size: 18px; margin-bottom: 30px; color: #555; line-height: 1.8; }
+        .content-section p a { color: #007fb5; text-decoration: none; font-weight: bold; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; color: #0a1931; font-size: 18px; }
+        input, textarea { width: 100%; padding: 16px; border-radius: 8px; border: 2px solid #00adb5; font-size: 17px; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        textarea { resize: vertical; min-height: 140px; }
+        .submit-btn { margin-top: 20px; background-color: #007fb5; color: white; border: none; padding: 14px 32px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; transition: background-color 0.3s ease, transform 0.3s ease; }
+        .submit-btn:hover { background-color: #00adb5; color: #0a1931; transform: translateY(-2px); }
+        .submit-btn:disabled { background-color: #a0cffc; cursor: not-allowed; transform: none; }
+        #form-message { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; display: none; }
+        .message-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        footer { background-color: #0a1931; color: #e0e0e0; text-align: center; padding: 40px 0; }
+        footer p { font-size: 18px; letter-spacing: 1.5px; }
+        @keyframes backgroundScroll { 0% { background-position: 0 0; } 100% { background-position: 100% 0; } }
+    </style>
 </head>
-<style>
-    /* Contact Section */
-#contact {
-    background-color: #fff;
-    padding: 60px 20px;
-    text-align: center;
-}
-
-.contact-form {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-label {
-    font-weight: bold;
-    margin-bottom: 10px;
-    display: block;
-}
-
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-}
-
-textarea {
-    resize: none;
-}
-
-.submit-btn {
-    background-color: #fca311;
-    color: white;
-    padding: 10px 20px;
-    font-size: 1.1em;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.submit-btn:hover {
-    background-color: #e69500;
-}
-
-</style>
 <body>
-   
+    <header class="header">
+        <div class="logo"><h1>AI RESUME SCREENING</h1></div>
+        <nav class="nav">
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('contactus') }}">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
 
-<!-- Contact Section -->
-<section id="contact">
-    <h2>Contact Us</h2>
-    <p>For more information or to get in touch, fill out the form below or reach us at <a href="mailto:resumescreening.com">info@resumescreening.com</a></p>
-    
-    <form action="/contactus" method="post" class="contact-form">
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" placeholder="Your Name" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="Your Email" required>
-        </div>
-        <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="5" placeholder="Your Message" required></textarea>
-        </div>
-        <button type="submit" class="submit-btn">Send Message</button>
-    </form>
-</section>
- 
+    <div class="main-content">
+        <section id="contact" class="content-section">
+            <h2 class="section-title">Contact Us</h2>
+            <p>For more information or to get in touch, fill out the form below.</p>
+            
+            <form id="contactForm" method="post" class="contact-form">
+                <div id="form-message"></div>
+
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Your Message" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 AI Resume Screening. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('contactForm');
+            const submitButton = form.querySelector('.submit-btn');
+            const messageDiv = document.getElementById('form-message');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitButton.disabled = true;
+                submitButton.innerText = 'Sending...';
+                const formData = new FormData(form);
+
+                // *** THIS LINE IS NOW CORRECTED ***
+                fetch("{{ url_for('contactus') }}", {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    messageDiv.style.display = 'block';
+                    messageDiv.textContent = data.message;
+
+                    if (data.status === 'success') {
+                        messageDiv.className = 'message-success';
+                        form.reset();
+                    } else {
+                        message-error';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    messageDiv.style.display = 'block';
+                    messageDiv.className = 'message-error';
+                    messageDiv.textContent = 'An unexpected error occurred. Please try again.';
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerText = 'Send Message';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

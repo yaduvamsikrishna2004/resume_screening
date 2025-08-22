@@ -3,74 +3,273 @@
 <head>
   <meta charset="UTF-8">
   <title>Resume Screening</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1e90ff, #00bfff); color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
-    .navbar { width: 100%; background: white; color: #0056b3; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
-    .navbar-container { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; padding: 0 5%; height: 60px; }
-    .navbar-brand { font-size: 1.5rem; font-weight: bold; }
-    .navbar-links { list-style: none; display: flex; gap: 28px; margin: 0; padding: 0; }
-    .navbar-links a { color: #0056b3; text-decoration: none; font-size: 1rem; font-weight: 500; transition: color 0.2s; }
-    .navbar-links a:hover { color: #ff0000; }
-    .main-section { display: flex; justify-content: space-between; align-items: center; padding: 0 5%; flex: 1; flex-wrap: wrap; }
-    .left, .right { flex: 1; min-width: 300px; }
-    .left { display: flex; flex-direction: column; justify-content: center; height: 100%; padding-right: 40px; }
-    .left h1 { font-size: 38px; margin-bottom: 15px; }
-    .left p { font-size: 18px; }
-    .right { display: flex; justify-content: center; align-items: center; padding: 40px; }
-    .right img { max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
-    .spacer { height: 200px; }
-    .form-below { background-color: #ffffff; color: #333; padding: 30px; margin: 30px auto; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); max-width: 700px; width: 98%; text-align: center; }
-    label { font-weight: 600; display: block; margin-top: 10px; color: #2c3e50; }
-    .form-below textarea, .form-below input[type="file"] { width: 100%; padding: 16px; margin-top: 14px; border-radius: 8px; border: 1px solid #ccc; font-size: 17px; box-sizing: border-box; }
-    .form-below textarea { min-height: 120px; resize: vertical; }
-    button, .submit-btn { margin-top: 20px; background-color: #007bff; color: white; border: none; padding: 14px 22px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease; }
-    button:hover, .submit-btn:hover { background-color: #0056b3; }
-    button:disabled, .submit-btn:disabled { background-color: #a0cffc; cursor: not-allowed; }
-    #results-section { display: none; margin: 40px auto; max-width: 1200px; background-color: white; color: #333; padding: 20px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); }
-    #results-section h2 { color: #007bff; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    /* General Body and Resets */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        overflow-x: hidden;
+        background: linear-gradient(135deg, #0a1931, #00adb5);
+        background-size: 400% 400%;
+        animation: backgroundScroll 15s ease infinite;
+    }
+
+    /* Header/Navbar Styling */
+    .header {
+        background-color: #0a1931;
+        color: white;
+        padding: 20px 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo h1, .navbar-brand {
+        font-size: 36px;
+        font-weight: bold;
+        font-family: 'Poppins', sans-serif;
+        color: #007fb5;
+    }
+    
+    .nav ul, .navbar-links {
+        list-style: none;
+        display: flex;
+        gap: 30px;
+    }
+
+    .nav ul li a, .navbar-links a {
+        color: #e0e0e0;
+        text-decoration: none;
+        font-size: 18px;
+        padding: 10px 15px;
+        transition: all 0.3s ease-in-out;
+        border-radius: 8px;
+    }
+
+    .nav ul li a:hover, .navbar-links a:hover {
+        background-color: #00adb5;
+        color: #0a1931;
+    }
+
+    /* Main/Hero Section */
+    .hero {
+        background-color: transparent;
+        min-height: 300px;
+        display: flex;
+        justify-content: center; /* Center items horizontally */
+        align-items: center;
+        gap: 40px; /* Add space between text and image */
+        color: white;
+        text-align: left;
+        position: relative;
+        z-index: 900;
+        padding: 40px 50px;
+        animation: fadeIn 1.5s ease-out;
+    }
+    
+    .hero .left {
+        flex: 1; /* Allow this item to grow and shrink */
+        max-width: 600px; /* Ensure text block doesn't get too wide */
+    }
+
+    .hero .right {
+        flex: 1; /* Allow this item to grow and shrink */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 500px;
+    }
+
+    .hero-content h1, .hero-content h2 {
+        font-size: 40px;
+        margin-bottom: 15px;
+        font-family: 'Poppins', sans-serif;
+        color: #00adb5;
+        letter-spacing: 1.5px;
+        animation: slideUp 1.5s ease-out;
+    }
+
+    .hero-content p {
+        font-size: 18px;
+        margin-bottom: 20px;
+        line-height: 1.8;
+        animation: fadeIn 1.8s ease-out;
+    }
+    
+    .hero .right img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* General Section Styling */
+    .content-section {
+        background-color: #ffffff;
+        padding: 60px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin: 30px auto;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        max-width: 900px;
+        width: 95%;
+    }
+
+    .section-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #043687;
+        text-transform: uppercase;
+        font-weight: bold;
+        border-bottom: 4px solid #00adb5;
+        display: inline-block;
+        padding-bottom: 10px;
+        animation: fadeIn 1.2s ease-out;
+    }
+    
+    /* Form Specific Styling */
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 20px;
+        color: #0a1931;
+        font-size: 18px;
+        text-align: left;
+    }
+
+    .content-section textarea, .content-section input[type="file"] {
+        width: 100%;
+        padding: 16px;
+        margin-top: 14px;
+        border-radius: 8px;
+        border: 2px solid #00adb5;
+        font-size: 17px;
+        box-sizing: border-box;
+    }
+
+    .content-section textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Button Styling */
+    .scan-btn, .submit-btn {
+        margin-top: 20px;
+        background-color: #007fb5;
+        color: white;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .scan-btn:hover, .submit-btn:hover {
+        background-color: #00adb5;
+        color: #0a1931;
+        transform: translateY(-2px);
+    }
+    
+    .submit-btn:disabled {
+        background-color: #a0cffc;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    /* Progress Bar */
+    .progress-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 40px auto;
+        max-width: 900px;
+        width: 95%;
+    }
+
+    .progress-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .circle { width: 44px; height: 44px; border-radius: 50%; background: #f0f0f0; border: 3px solid #ccc; color: #333; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 600; margin-bottom: 8px; transition: all 0.3s ease; }
+    .progress-step.active .circle { background: #00adb5; color: #fff; border-color: #007fb5; }
+    .step-label { font-size: 1.1rem; font-weight: bold; color: white; margin-top: 2px; text-align: center; }
+    .progress-line { height: 4px; background: #ccc; flex: 1; }
+    
+    /* Results Table */
+    #results-section { display: none; }
+    table { width: 100%; border-collapse: collapse; font-size: 16px; margin-top: 20px; }
     th, td { padding: 14px; text-align: center; border-bottom: 1px solid #e0e0e0; }
-    th { background-color: #007bff; color: white; }
-    .scan-btn { margin-top: 28px; background-color: white; color: #007bff; border: none; padding: 14px 32px; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 600; transition: background-color 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .scan-btn:hover { background-color: lightblue; }
-    .download-btn { background-color: #28a745; color: white; padding: 8px 12px; text-decoration: none; border-radius: 5px; transition: background-color 0.2s; font-size: 14px; display: inline-block; }
-    .download-btn:hover { background-color: #218838; }
-    .progress-container { display: flex; align-items: center; justify-content: center; margin: 40px auto 10px auto; max-width: 700px; width: 100%; gap: 0; }
-    .progress-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 100px; }
-    .circle { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 3px solid #e0e0e0; color: #222; display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 600; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: border 0.3s, background 0.3s; }
-    .progress-step.active .circle { background: #1e90ff; color: #fff; border: 3px solid #1e90ff; box-shadow: 0 0 10px #1e90ff44; }
-    .step-label { font-size: 1.08rem; font-weight: 600; color: #222; margin-top: 2px; text-align: center; }
-    .progress-line { height: 3px; background: #e0e0e0; flex: 1; margin: 0 8px; border-radius: 2px; }
+    th { background-color: #0a1931; color: white; }
+    .download-btn { background-color: #00adb5; color: #0a1931; padding: 8px 15px; text-decoration: none; border-radius: 5px; transition: background-color 0.2s; font-size: 14px; font-weight: bold; display: inline-block; }
+    .download-btn:hover { background-color: #007fb5; color: white; }
+    
+    /* Alert for Model Warning */
     .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: .25rem; }
     .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+
+    /* Footer Styling */
+    footer {
+        background-color: #0a1931;
+        color: #e0e0e0;
+        text-align: center;
+        padding: 40px 0;
+        position: relative;
+        margin-top: 60px;
+        box-shadow: 0px -4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    footer p {
+        font-size: 18px;
+        letter-spacing: 1.5px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes slideUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes backgroundScroll { 0% { background-position: 0 0; } 100% { background-position: 100% 0; } }
   </style>
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="navbar-container">
-      <span class="navbar-brand">Resume Screening AI</span>
+  <header class="header">
+    <div class="logo">
+      <h1>AI RESUME SCREENING</h1>
+    </div>
+    <nav class="nav">
       <ul class="navbar-links">
         <li><a href="{{ url_for('index') }}">Home</a></li>
         <li><a href="#results-section">Results</a></li>
-        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        <li><a href="{{ url_for('index') }}">Logout</a></li> <!-- Changed to Home for demo -->
       </ul>
-    </div>
-  </nav>
+    </nav>
+  </header>
 
-  <div class="main-section">
-    <div class="left">
+  <section class="hero">
+    <div class="hero-content left">
       <h1>Optimize your resume to get more interviews</h1>
       <p>Upload a job description and your resume(s) to receive a detailed analysis and ranking.</p>
-      <button id="scan-btn" class="scan-btn">Scan Your Resume Now</button>
+      <button id="scan-btn" class="scan-btn">Scan Your Resume </button>
     </div>
     <div class="right">
+      <!-- Image path correctly points to the static folder now -->
       <img src="{{ url_for('static', filename='Cover.png') }}" alt="Resume Screening Illustration">
     </div>
-  </div>
-
-  <div class="spacer"></div>
-
+  </section>
+  
   <div class="progress-container">
     <div class="progress-step active" id="step1"><div class="circle">1</div><div class="step-label">Add Job Details</div></div>
     <div class="progress-line"></div>
@@ -79,29 +278,30 @@
     <div class="progress-step" id="step3"><div class="circle">3</div><div class="step-label">View Results</div></div>
   </div>
 
-  <div class="form-below">
-    {% if not model_loaded %}
-    <div class="alert alert-danger" role="alert">
-      <strong>Warning:</strong> The prediction model is not loaded on the server. Analysis is currently unavailable.
-    </div>
-    {% endif %}
+  <section class="content-section form-below">
     <form id="resumeForm" enctype="multipart/form-data">
       <label for="job_description">Paste Job Description Here:</label>
-      <textarea name="job_description" id="job_description" rows="6" required {% if not model_loaded %}disabled{% endif %}></textarea>
+      <textarea name="job_description" id="job_description" rows="6" required></textarea>
 
       <label for="resumes">Select Resumes (.txt/.pdf):</label>
-      <input type="file" name="resumes" id="resumes" multiple required accept=".txt,.pdf" {% if not model_loaded %}disabled{% endif %}>
+      <input type="file" name="resumes" id="resumes" multiple required accept=".txt,.pdf">
 
-      <button type="submit" class="submit-btn" {% if not model_loaded %}disabled{% endif %}>Analyze Resumes</button>
+      <button type="submit" class="submit-btn">Analyze Resumes</button>
     </form>
-  </div>
+  </section>
 
-  <div id="results-section">
-    <h2>Analysis Results</h2>
+  <section id="results-section" class="content-section">
+    <h2 class="section-title">Analysis Results</h2>
     <div id="results-container">
-      <table id="results-table"></table>
+      <table id="results-table">
+          <!-- JS will populate this from server response -->
+      </table>
     </div>
-  </div>
+  </section>
+  
+  <footer>
+      <p>&copy; 2025 AI Resume Screening. All Rights Reserved.</p>
+  </footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -131,17 +331,22 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.innerText = 'Processing...';
         resultsSection.style.display = 'none';
 
-        fetch('/predict', {
+        // The JS now fetches data from the backend
+        fetch("{{ url_for('predict') }}", {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                 return response.json().then(err => { throw new Error(err.error) });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
                 throw new Error(data.error);
             }
-
-            // Clear previous results and build table
+            
             resultsTable.innerHTML = `
               <thead>
                 <tr>
@@ -158,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
               </tbody>
             `;
             const tableBody = resultsTable.querySelector('tbody');
-
+            
             data.results.forEach(res => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -169,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   <td>${res.similarity.toFixed(2)}</td>
                   <td><b>${res.score.toFixed(2)}</b></td>
                   <td>
-                    <a href="${res.download_url}" class="download-btn" target="_blank">Download</a>
+                    <a href="${res.download_url}" class="download-btn">Download</a>
                   </td>
                 `;
                 tableBody.appendChild(tr);

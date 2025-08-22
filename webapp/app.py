@@ -247,7 +247,16 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
+
+
+
 # --- 5. RUN APP ---
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    
+    app.run(
+        host="0.0.0.0",   # allows external access (important for deployment)
+        port=8000,
+        debug=False,      # turn off debug for production
+        threaded=True     # multiple users at the same time
+    )
