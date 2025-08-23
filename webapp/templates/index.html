@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>AI based resume Screening</title>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Screening | Optimize Your Resume for Success</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* --- CSS Variables for Easy Theme Management --- */
+:root {
+    --primary-color: #0a1931;
+    --secondary-color: #00adb5;
+    --accent-color: #007fb5;
+    --text-color: #333;
+    --light-text-color: #e0e0e0;
+    --background-light: #ffffff;
+    --background-dark: #f0f0f0;
+    --font-primary: 'Poppins', sans-serif;
+    --font-secondary: 'Roboto', sans-serif;
+}
+
+/* --- General Body and Reset Styles --- */
 * {
     margin: 0;
     padding: 0;
@@ -11,16 +29,24 @@
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
+    font-family: var(--font-secondary);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background-size: 400% 400%;
+    color: var(--text-color);
     overflow-x: hidden;
+    animation: backgroundScroll 15s ease infinite;
 }
 
-/* Header Styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Header Styling --- */
 .header {
-    background-color: #0a1931;
-    color: white;
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
     padding: 20px 50px;
     display: flex;
     justify-content: space-between;
@@ -30,11 +56,15 @@ body {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
 }
 
+.logo a {
+    text-decoration: none;
+}
+
 .logo h1 {
     font-size: 36px;
     font-weight: bold;
-    font-family: 'Poppins', sans-serif;
-    color: #007fb5;
+    font-family: var(--font-primary);
+    color: var(--accent-color);
 }
 
 .nav ul {
@@ -44,7 +74,7 @@ body {
 }
 
 .nav ul li a {
-    color: #e0e0e0;
+    color: var(--light-text-color);
     text-decoration: none;
     font-size: 18px;
     padding: 10px 15px;
@@ -53,41 +83,31 @@ body {
 }
 
 .nav ul li a:hover {
-    background-color: #00adb5;
-    color: #0a1931;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
 }
 
-/* Hero Section */
+/* --- Hero Section --- */
 .hero {
-    background: url('small-background.jpg') no-repeat center center/cover;
-    height: 300px;
+    background: linear-gradient(rgba(10, 25, 49, 0.7), rgba(10, 25, 49, 0.7)), url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80') no-repeat center center/cover;
+    height: 350px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
     text-align: center;
     position: relative;
-    z-index: 900;
     animation: fadeIn 1.5s ease-out;
 }
 
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
 
 .hero-content h2 {
     font-size: 40px;
     margin-bottom: 15px;
-    font-family: 'Poppins', sans-serif;
-    color: #00adb5;
+    font-family: var(--font-primary);
+    color: var(--secondary-color);
     letter-spacing: 1.5px;
     animation: slideUp 1.5s ease-out;
-}
-
-@keyframes slideUp {
-    0% { transform: translateY(30px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
 }
 
 .hero-content p {
@@ -98,9 +118,9 @@ body {
     animation: fadeIn 1.8s ease-out;
 }
 
-/* Section Styling */
+/* --- Section Styling --- */
 .information, .features, .success {
-    background-color: #ffffff;
+    background-color: var(--background-light);
     padding: 60px 0;
     text-align: center;
     position: relative;
@@ -113,40 +133,37 @@ body {
     color: #043687;
     text-transform: uppercase;
     font-weight: bold;
-    border-bottom: 4px solid #00adb5;
+    border-bottom: 4px solid var(--secondary-color);
     display: inline-block;
     padding-bottom: 10px;
-    animation: fadeIn 1.2s ease-out;
 }
 
-.information p, .features p, .success p {
+.information p, .features > .container > p, .success p {
     font-size: 18px;
     margin-bottom: 15px;
-    color: #333;
+    color: var(--text-color);
     line-height: 1.8;
-    animation: fadeIn 1.2s ease-out;
 }
 
 .features .feature-box {
     background-color: #f9f9f9;
     padding: 30px;
-    margin-bottom: 30px;
-    border: 2px solid #00adb5;
+    margin: 30px auto;
+    border: 2px solid var(--secondary-color);
     border-radius: 10px;
     text-align: left;
     max-width: 700px;
-    margin: 30px auto;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .features .feature-box:hover {
-    transform: scale(1.05);
+    transform: translateY(-5px);
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .features .feature-box h3 {
-    color: #0a1931;
+    color: var(--primary-color);
     margin-bottom: 15px;
     font-size: 22px;
     font-weight: bold;
@@ -155,18 +172,15 @@ body {
 .success p {
     max-width: 800px;
     margin: 0 auto;
-    font-size: 18px;
-    color: #333;
 }
 
-/* Footer Styling */
+/* --- Footer Styling --- */
 footer {
-    background-color: #0a1931;
-    color: #e0e0e0;
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
     text-align: center;
     padding: 40px 0;
     position: relative;
-    z-index: 1000;
     box-shadow: 0px -4px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -174,95 +188,134 @@ footer p {
     font-size: 18px;
     margin-bottom: 10px;
     letter-spacing: 1.5px;
-    font-family: 'Roboto', sans-serif;
 }
 
+/* --- Animations --- */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
 
-
-@keyframes footerSlideUp {
+@keyframes slideUp {
     0% { transform: translateY(30px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
 }
 
-/* Animations */
 @keyframes backgroundScroll {
-    0% { background-position: 0 0; }
-    100% { background-position: 100% 0; }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-body {
-    background: linear-gradient(135deg, #0a1931, #00adb5);
-    background-size: 400% 400%;
-    animation: backgroundScroll 15s ease infinite;
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .nav ul {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .hero-content h2 {
+        font-size: 32px;
+    }
+
+    .hero-content p {
+        font-size: 16px;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo h1 {
+        font-size: 28px;
+    }
+
+    .hero {
+        height: auto;
+        padding: 40px 20px;
+    }
+
+    .features .feature-box {
+        padding: 20px;
+    }
 }
 
 </style>
+</head>
 <body>
     <header class="header">
-        <div class="logo" action="/index">
-            <h1>AI RESUME SCREENING </h1>
+        <div class="logo">
+            <a href="/" aria-label="Go to Homepage">
+                <h1>AI RESUME SCREENING</h1>
+            </a>
         </div>
         <nav class="nav">
             <ul>
-                <li><a href="{{ url_for('resume') }}">Scan Resume</a></li>
-                <li><a href="{{ url_for('signin') }}" class="login-btn">Sign In/Sign Up</a></li>
-                 <li><a href="{{ url_for('contactus') }}">Contact Us</a></li>
+                <li><a href="{{ url_for('resume') }}" aria-label="Scan your resume">Scan Resume</a></li>
+                <li><a href="{{ url_for('signin') }}" class="login-btn" aria-label="Sign in or sign up">Sign In/Sign Up</a></li>
+                <li><a href="{{ url_for('contactus') }}" aria-label="Contact us">Contact Us</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h2>Welcome to AI Based Resume Screening</h2>
-            <p>                   AI Resume Screening helps you optimize your resume for any job, highlighting the key experience and skills recruiters need to see. helps you optimize your resume for any job, highlighting the key experience and skills recruiters need to see.</p>
-        </div>
-    </section>
+    <main>
+        <section class="hero" role="banner">
+            <div class="hero-content">
+                <h2>Intelligent Resume Screening for the Modern Job Seeker</h2>
+                <p>Optimize your resume for any job application. Our AI highlights the key experiences and skills that recruiters and hiring managers need to see.</p>
+            </div>
+        </section>
 
-    <section class="information">
-        <div class="container">
-            <h2 class="section-title">Optimize your resume to get more interviews</h2>
-            <p>AI Resume Screening is an AI-powered resume optimization tool that helps you tailor your resume to match job listings. </p>
-            <p>By analyzing your resume and comparing it to the job description, our AI technology provides you with a match rate report </p>
-            <p>With AI Resume Screening, you can ensure that your resume is optimized for Applicant.</p>
-        </div>
-    </section>
+        <section class="information" role="main">
+            <div class="container">
+                <h2 class="section-title">Unlock More Interviews with an Optimized Resume</h2>
+                <p>Our AI-powered platform helps you tailor your resume to perfectly match the job you want. Stop guessing and start getting noticed.</p>
+                <p>By analyzing your resume against the job description, our technology provides a detailed match report, showing you exactly where to improve.</p>
+                <p>Ensure your application stands out and makes it past the initial screening.</p>
+            </div>
+        </section>
 
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">Why use AI RESUME SCREENING</h2>
-            <div class="feature-box">
-                <h3>RESUME OPTIMIZATION</h3>
-                <p>Is your resume a good match for what a recruiter is looking for? If it's not, you might miss out on interviews for jobs you feel qualified for. AI Resume Screening's proprietary AI analyzes your resume and compares it to the job listing using AI technology. Use your match rate report to see how to optimize your resume to get more interviews.</p>
+        <section class="features" role="main">
+            <div class="container">
+                <h2 class="section-title">Why Use AI Resume Screening?</h2>
+                <div class="feature-box">
+                    <h3>Strategic Resume Optimization</h3>
+                    <p>Is your resume truly aligned with what recruiters are looking for? Our AI analyzes your resume against job listings to provide a detailed match score. Use your personalized report to strategically optimize your resume and secure more interviews.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Beat the Applicant Tracking System (ATS)</h3>
+                    <p>Over 98% of Fortune 500 companies use Applicant Tracking Systems (ATS) to filter resumes. These bots can prevent qualified candidates from being seen. We've reverse-engineered top ATS platforms to help your resume get past the bots and into human hands.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Identify and Bridge Skill Gaps</h3>
+                    <p>Our platform intelligently scans your resume for hard skills, soft skills, and crucial keywords from the job description. We'll show you exactly which skills are missing so you can highlight the most relevant experience recruiters are searching for.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Instant ATS Score Check</h3>
+                    <p>Many resume builders create documents that are not ATS-friendly. Our tool provides an instant ATS compatibility score, giving you the confidence that your resume is formatted for success and ready for modern application systems.</p>
+                </div>
             </div>
-            <div class="feature-box">
-                <h3>APPLICANT TRACKING SYSTEM</h3>
-                <p>Most companies, including 99% of Fortune 500, use Applicant Tracking Systems (ATS) to process your resume. These systems might cause qualified candidates like you to slip through the cracks. AI Resume Screeing reverse-engineered all the top ATS and studied recruiter workflows to get you in the "yes" pile.</p>
-            </div>
-            <div class="feature-box">
-                <h3>See your missing skills</h3>
-                <p>AI RESUME SCREENING matches hard skills, soft skills, and keywords from the job listing to your resume. AI-powered system will show you how to tailor your resume so that you highlight the skills and experience recruiters are searching for.</p>
-            </div>
-            <div class="feature-box">
-                <h3>Check ATS Score </h3>
-                <p>Most online resume builders are not designed to help you get past an ATS. AI Resume Screening helps you to check ur ATS Score.  </p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="success">
-        <div class="container">
-            <h2 class="section-title">AI Resume Screening helps to increase your interview chances by 50%</h2>
-            <p>Many job seekers don’t get enough interviews even after applying for dozens of jobs. Why?
-Companies use Applicant Tracking Systems (ATS) to search and filter resumes by keywords.
-The AI Based resume scanner helps you optimize your resume keywords for each job listing so that your application gets found by recruiters.
-            AI Resume Screening is the only resume scanner that helps you optimize your resume for ATS and recruiters. Our AI-powered system analyzes your resume and compares it to the job listing, giving you a match rate report and suggestions on how to improve your resume.
-            With AI Resume Screening, you can increase your chances of getting interviews and landing your dream job.</p>
-        </div>
-    </section>
+        <section class="success" role="main">
+            <div class="container">
+                <h2 class="section-title">Boost Your Interview Chances by up to 50%</h2>
+                <p>Tired of applying to dozens of jobs with no response? The problem often lies with automated filtering. Companies rely on Applicant Tracking Systems (ATS) to find keyword-optimized resumes. Our AI-powered scanner helps you tailor your resume for each specific job, ensuring you get noticed by recruiters. Stop letting opportunities slip through the cracks and start landing the interviews you deserve.</p>
+            </div>
+        </section>
+    </main>
 
     <footer>
         <p>&copy; 2025 AI Resume Screening. All Rights Reserved.</p>
-
     </footer>
 </body>
 </html>

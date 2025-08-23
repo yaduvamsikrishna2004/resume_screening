@@ -3,7 +3,7 @@ import pickle
 from flask import Flask, request, render_template, jsonify, redirect, url_for, session, send_from_directory, abort
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime , timezone
 import fitz  # PyMuPDF
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -19,14 +19,15 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev_only_change_me')
 
 # Always use an absolute path for uploads (single source of truth)
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+UPLOAD_FOLDER = os.environ.get(
+    "UPLOAD_FOLDER",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
 # Optional: protect against huge uploads (e.g., 16 MB)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-# Create the uploads folder if it doesn't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Detect Flask version to choose correct send_from_directory parameter
 FLASK_VERSION = tuple(map(int, flask.__version__.split('.')[:2]))
@@ -45,8 +46,11 @@ ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
 ADMIN_PASSWORD = generate_password_hash(os.environ.get('ADMIN_PASSWORD', 'adminpassword'))
 
 # MongoDB setup
-client = MongoClient("mongodb://localhost:27017/")
-db = client["resume_screening"]
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/resume_screening")
+client = MongoClient(MONGO_URI)
+# If your URI includes a db name at the end, this picks it automatically; else fallback:
+DEFAULT_DB = os.environ.get("MONGO_DB", "resume_screening")
+db = client.get_database() if client.get_database().name else client[DEFAULT_DB]
 uploads_col = db["uploads"]
 users_collection = db["users"]
 contact_collection = db["contacts"]
@@ -193,7 +197,7 @@ def contactus():
         name = request.form.get('name')
         email = request.form.get('email')
         message = request.form.get('message')
-        contact_message = {'name': name, 'email': email, 'message': message, 'sent_at': datetime.utcnow()}
+        contact_message = {'name': name, 'email': email, 'message': message, 'sent_at': datetime.now(timezone.utc)}
         contact_collection.insert_one(contact_message)
         try:
             msg = Message('Contact Form Submission', recipients=[email])
@@ -256,7 +260,7 @@ if __name__ == '__main__':
     
     app.run(
         host="0.0.0.0",   # allows external access (important for deployment)
-        port=8000,
+        port=5000,
         debug=False,      # turn off debug for production
         threaded=True     # multiple users at the same time
     )
