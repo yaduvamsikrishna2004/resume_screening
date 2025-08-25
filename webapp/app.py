@@ -26,8 +26,8 @@ UPLOAD_FOLDER = os.environ.get(
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf'}
-# Optional: protect against huge uploads (e.g., 16 MB)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+# Optional: protect against huge uploads (e.g., 50 MB)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 # Detect Flask version to choose correct send_from_directory parameter
 FLASK_VERSION = tuple(map(int, flask.__version__.split('.')[:2]))
