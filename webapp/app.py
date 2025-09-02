@@ -45,31 +45,16 @@ mail = Mail(app)
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
 ADMIN_PASSWORD = generate_password_hash(os.environ.get('ADMIN_PASSWORD', 'adminpassword'))
 
-# Get the MongoDB URI from environment variables.
-# It's better to fail loudly if it's not set in production.
-MONGO_URI = os.environ.get("MONGO_URI")
-if not MONGO_URI:
-    raise Exception("FATAL: MONGO_URI environment variable is not set.")
-
-try:
-    # It's good practice to wrap the connection in a try...except block.
-    client = MongoClient(MONGO_URI)
-    # The get_database() method is the standard way to get a db object.
-    # It automatically uses the database specified in your MONGO_URI.
-    db = client.get_database()
-
-    # Verify the connection. This will raise an exception if connection fails.
-    client.admin.command('ping')
-    print("MongoDB connection successful.")
-
-except ConnectionFailure as e:
-    raise Exception(f"MongoDB connection failed: {e}")
-
-
-# Now you can define your collections
+# MongoDB setup
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/resume_screening")
+client = MongoClient(MONGO_URI)
+# If your URI includes a db name at the end, this picks it automatically; else fallback:
+DEFAULT_DB = os.environ.get("MONGO_DB", "resume_screening")
+db = client.get_database() if client.get_database().name else client[DEFAULT_DB]
 uploads_col = db["uploads"]
 users_collection = db["users"]
 contact_collection = db["contacts"]
+
 
 # Load ML model with error handling
 try:
